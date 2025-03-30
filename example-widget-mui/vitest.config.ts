@@ -14,4 +14,14 @@
  * limitations under the License.
  */
 
-/// <reference types="vite/client" />
+/// <reference types="vitest" />
+
+import { defineConfig } from 'vite';
+
+export default defineConfig({
+  test: {
+    environment: 'happy-dom',
+    setupFiles: ['./src/setupTests.ts'],
+    exclude: ['build'],
+  },
+});
