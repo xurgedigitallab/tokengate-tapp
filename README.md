@@ -41,6 +41,16 @@ This repository serves as a starting point for developers looking to create cust
    npm start
    ```
 
+4. Use Ngrok to expose your development server to the internet
+   ```
+   ngrok http 3000
+   ```
+
+5. Add the ngrok URL to your TextRP room
+   ```
+   /addwidget <ngrok-url>
+   ```
+
 ## Customization
 
 ### Widget Configuration
