@@ -27,7 +27,7 @@ This repository serves as a starting point for developers looking to create cust
 
 1. Clone this repository
    ```
-   git clone https://github.com/your-username/TextRP-Widget-Template.git
+   git clone https://github.com/xurgedigitallab/TextRP-Widget-Template.git
    cd TextRP-Widget-Template
    ```
 
