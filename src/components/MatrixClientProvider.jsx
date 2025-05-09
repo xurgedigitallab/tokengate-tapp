@@ -103,22 +103,43 @@ const MatrixClientProvider = () => {
       setLoading(true);
       try {
         const events = await widgetApi.receiveStateEvents(STATE_EVENT_ROOM_MEMBER);
-        const usersList = events.map(item => ({
-          name: item.content.displayname,
-          userId: item.sender
-        }));
+        
+        // Filter out users who aren't actual members (just invited)
+        const usersList = events
+          .filter(item => {
+            // Only include users with membership state 'join' or having displayname
+            return item.content.membership === 'join' && item.content.displayname;
+          })
+          .map(item => ({
+            name: item.content.displayname,
+            userId: item.sender,
+            membership: item.content.membership
+          }));
 
-        const userIds = usersList.map(member => member.userId.split(":")[0].replace("@", ""));
-        const trustLinesArray = await getTrustLinesAsArray(userIds);
+        // Only get trustlines for valid members
+        const validUserIds = usersList.map(member => member.userId.split(":")[0].replace("@", ""));
+        console.log("Valid user IDs:", validUserIds);
+        
+        // Get trustlines data
+        const trustLinesArray = await getTrustLinesAsArray(validUserIds);
+        console.log("Trust lines array:", trustLinesArray);
+        
+        // Find the current user
         const own = usersList.find((u) => u.name === widgetApi.widgetParameters.displayName);
-        const ownWalletAddress = own.userId?.split(":")[0].replace("@", "");
+        const ownWalletAddress = own?.userId?.split(":")[0].replace("@", "") || "";
         setMyWalletAddress(ownWalletAddress);
 
+        // Map trustlines to users, ensuring correct wallet matching
         const usersWithTrustLines = usersList.map(user => {
           const walletAddress = user.userId.split(":")[0].replace("@", "")
+          // Find exact match for this wallet address
           const trustData = trustLinesArray.find(t => t.wallet === walletAddress)
+          
+          console.log(`User ${user.name}, wallet ${walletAddress}, found trustData:`, !!trustData);
+          
           return {
             ...user,
+            walletAddress, // Add wallet address to user object for transparency
             trustLines: trustData?.trustLines || [],
             trustLineError: trustData?.error || null
           }
