@@ -1,9 +1,8 @@
-import React, { Suspense } from "react";
-import { MuiWidgetApiProvider } from '@matrix-widget-toolkit/mui';
-import { BrowserRouter } from 'react-router-dom';
+import { Suspense } from "react";
+import { MuiThemeProvider, MuiWidgetApiProvider } from '@matrix-widget-toolkit/mui';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { WidgetParameter } from '@matrix-widget-toolkit/api';
-import MatrixClientProvider from './components/MatrixClientProvider';
-import { ThemeProvider } from "./context/ThemeContext";
+import { NFTAdmin } from "./NFTAdmin";
 
 interface AppProps {
   widgetApiPromise: Promise<any>;
@@ -12,21 +11,23 @@ interface AppProps {
 function App({ widgetApiPromise }: AppProps) {
   return (
     <BrowserRouter>
-      <ThemeProvider>
+      <MuiThemeProvider>
         <Suspense fallback={<></>}>
           <MuiWidgetApiProvider
             widgetApiPromise={widgetApiPromise}
             widgetRegistration={{
-              name: 'TextRP Widget Template',
-              type: 'com.example.widget',
-              data: { title: 'TextRP Widget Template' },
+              name: 'NFT Gate',
+              type: 'com.example.nftgate',
+              data: { title: 'Give access to NFT holders' },
               requiredParameters: [WidgetParameter.DeviceId],
             }}
           >
-            <MatrixClientProvider />
+            <Routes>
+              <Route path="/" element={<NFTAdmin />} />
+            </Routes>
           </MuiWidgetApiProvider>
         </Suspense>
-      </ThemeProvider>
+      </MuiThemeProvider>
     </BrowserRouter>
   );
 }

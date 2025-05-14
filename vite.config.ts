@@ -19,6 +19,15 @@ export default defineConfig({
   server: {
     port: 3000,
     // Turn off auto-opening browser
+    proxy: {
+      // Proxy API requests to solve CORS issues
+      '/api': {
+        target: 'https://15c32806-20be-45c8-b3ea-1f0a3e72dfb5-00-2ojqtwmdtbb4m.kirk.replit.dev',
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path,
+      },
+    },
     open: false,
     // Enable access from any host
     host: '0.0.0.0',
