@@ -2,7 +2,35 @@ import React from "react";
 import "./Home.css";
 import { useTheme } from "../../context/ThemeContext";
 
-const Home = ({ myWalletAddress, membersList, wgtParameters }) => {
+interface TrustLine {
+  account: string;
+  balance: string;
+  currency: string;
+  decodedCurrency: string;
+  limit: string;
+  limit_peer: string;
+  quality_in: number;
+  quality_out: number;
+  no_ripple?: boolean;
+  no_ripple_peer?: boolean;
+}
+
+interface Member {
+  name: string;
+  userId: string;
+  membership: string;
+  walletAddress?: string;
+  trustLines?: TrustLine[];
+  trustLineError?: string | null;
+}
+
+interface HomeProps {
+  myWalletAddress: string;
+  membersList: Member[];
+  wgtParameters: any; // Using any for widget parameters as the structure might be complex
+}
+
+const Home: React.FC<HomeProps> = ({ myWalletAddress, membersList, wgtParameters }) => {
     const { theme } = useTheme();
     return (
         <div className="home-container dark:text-white text-black">

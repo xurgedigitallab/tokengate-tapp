@@ -1,5 +1,5 @@
 import React from 'react';
-import { createRoot } from 'react-dom/client';
+import ReactDOM from 'react-dom/client';
 import { WidgetApiImpl } from '@matrix-widget-toolkit/api';
 import { EventDirection, WidgetEventCapability } from 'matrix-widget-api';
 import './index.css';
@@ -39,7 +39,7 @@ const widgetApiPromise = WidgetApiImpl.create({
   ],
 });
 
-createRoot(document.getElementById('root')).render(
+ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     <App widgetApiPromise={widgetApiPromise} />
   </React.StrictMode>

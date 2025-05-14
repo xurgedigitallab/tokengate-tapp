@@ -5,7 +5,11 @@ import { WidgetParameter } from '@matrix-widget-toolkit/api';
 import MatrixClientProvider from './components/MatrixClientProvider';
 import { ThemeProvider } from "./context/ThemeContext";
 
-function App({ widgetApiPromise }) {
+interface AppProps {
+  widgetApiPromise: Promise<any>;
+}
+
+function App({ widgetApiPromise }: AppProps) {
   return (
     <BrowserRouter>
       <ThemeProvider>
@@ -22,7 +26,7 @@ function App({ widgetApiPromise }) {
             <MatrixClientProvider />
           </MuiWidgetApiProvider>
         </Suspense>
-        </ThemeProvider>
+      </ThemeProvider>
     </BrowserRouter>
   );
 }

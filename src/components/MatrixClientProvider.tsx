@@ -6,11 +6,52 @@ import { STATE_EVENT_ROOM_MEMBER } from "@matrix-widget-toolkit/api";
 import { Tooltip } from "@mui/material";
 import { useTheme } from "../context/ThemeContext";
 import { Buffer } from "buffer";
-import Home from "../pages/Home";
-import API_URLS from "../config";
-import LoadingOverlay from "./LoadingOverlay";
+import Home from "../pages/Home/index";
+import API_URLS from "../config.ts";
+import LoadingOverlay from "./LoadingOverlay/index";
+import * as xrpl from "xrpl";
 
-const decodeCurrency = (currency) => {
+// Types definitions for the component
+interface TrustLine {
+  account: string;
+  balance: string;
+  currency: string;
+  decodedCurrency: string;
+  limit: string;
+  limit_peer: string;
+  quality_in: number;
+  quality_out: number;
+  no_ripple?: boolean;
+  no_ripple_peer?: boolean;
+}
+
+interface WalletTrustLines {
+  wallet: string;
+  trustLines: TrustLine[];
+  error?: string;
+}
+
+interface Member {
+  name: string;
+  userId: string;
+  membership: string;
+  walletAddress?: string;
+  trustLines?: TrustLine[];
+  trustLineError?: string | null;
+}
+
+interface RoomMemberContent {
+  membership?: string;
+  displayname?: string;
+}
+
+interface RoomEvent {
+  content: RoomMemberContent;
+  sender: string;
+}
+
+// Helper function to decode currency
+const decodeCurrency = (currency: string): string => {
   try {
     // Return as is if it's a standard short currency code
     if (currency.length <= 3) return currency
@@ -55,12 +96,11 @@ const decodeCurrency = (currency) => {
   }
 }
 
-async function getTrustLinesAsArray(wallets) {
-  const xrpl = require('xrpl');
-  const client = new xrpl.Client(API_URLS.xrplMainnetUrl) // mainnet
+async function getTrustLinesAsArray(wallets: string[]): Promise<WalletTrustLines[]> {
+  const client = new xrpl.Client(API_URLS.xrplMainnetUrl || 'wss://xrplcluster.com') // mainnet with fallback URL
   await client.connect();
 
-  const trustLinesArray = []
+  const trustLinesArray: WalletTrustLines[] = []
 
   for (const address of wallets) {
     try {
@@ -68,7 +108,7 @@ async function getTrustLinesAsArray(wallets) {
         command: "account_lines",
         account: address,
       })
-      const decodedLines = response.result.lines.map(line => ({
+      const decodedLines = response.result.lines.map((line: any) => ({
         ...line,
         currency: line.currency,
         decodedCurrency: decodeCurrency(line.currency)
@@ -77,7 +117,7 @@ async function getTrustLinesAsArray(wallets) {
         wallet: address,
         trustLines: decodedLines
       })
-    } catch (err) {
+    } catch (err: any) {
       trustLinesArray.push({
         wallet: address,
         error: err.data?.error_message || err.message,
@@ -89,32 +129,36 @@ async function getTrustLinesAsArray(wallets) {
   return trustLinesArray;
 }
 
-const MatrixClientProvider = () => {
-  const [selectedIndex, setSelectedIndex] = useState(0);
+const MatrixClientProvider: React.FC = () => {
+  const [selectedIndex, setSelectedIndex] = useState<number>(0);
   const widgetApi = useWidgetApi();
 
-  const [loading, setLoading] = useState(true);
-  const [membersList, setMembersList] = useState([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [membersList, setMembersList] = useState<Member[]>([]);
   const { theme, toggleTheme } = useTheme();
-  const [myOwnWalletAddress, setMyWalletAddress] = useState("");
+  const [myOwnWalletAddress, setMyWalletAddress] = useState<string>("");
 
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
       try {
-        const events = await widgetApi.receiveStateEvents(STATE_EVENT_ROOM_MEMBER);
+        const events = await widgetApi.receiveStateEvents<RoomEvent>(STATE_EVENT_ROOM_MEMBER);
         
         // Filter out users who aren't actual members (just invited)
         const usersList = events
           .filter(item => {
             // Only include users with membership state 'join' or having displayname
-            return item.content.membership === 'join' && item.content.displayname;
+            const content = item.content as RoomMemberContent;
+            return content.membership === 'join' && content.displayname;
           })
-          .map(item => ({
-            name: item.content.displayname,
-            userId: item.sender,
-            membership: item.content.membership
-          }));
+          .map(item => {
+            const content = item.content as RoomMemberContent;
+            return {
+              name: content.displayname || '',
+              userId: item.sender,
+              membership: content.membership || ''
+            };
+          });
 
         // Only get trustlines for valid members
         const validUserIds = usersList.map(member => member.userId.split(":")[0].replace("@", ""));
@@ -166,7 +210,7 @@ const MatrixClientProvider = () => {
       {loading ? (
         <LoadingOverlay message="Loading..." />
       ) : (
-        < Box sx={{
+        <Box sx={{
           width: "100%",
           borderRadius: 2,
           boxShadow: 1,
@@ -187,7 +231,7 @@ const MatrixClientProvider = () => {
 
           <Tabs
             value={selectedIndex}
-            onChange={(event, newIndex) => setSelectedIndex(newIndex)}
+            onChange={(_, newIndex) => setSelectedIndex(newIndex)}
             variant="fullWidth"
             textColor="primary"
             indicatorColor="primary"
@@ -200,7 +244,7 @@ const MatrixClientProvider = () => {
           <Box sx={{ p: 2, position: "relative", overflow: "hidden" }}>
             <AnimatePresence mode="wait">
               <motion.div
-                
+                key={selectedIndex}
                 variants={panelVariants}
                 initial="hidden"
                 animate="visible"
@@ -210,16 +254,13 @@ const MatrixClientProvider = () => {
                 <div style={{ display: selectedIndex === 0 ? "block" : "none" }}>
                   <Home myWalletAddress={myOwnWalletAddress} membersList={membersList} wgtParameters={widgetApi.widgetParameters} />
                 </div>
-
               </motion.div>
             </AnimatePresence>
           </Box>
-        </Box >
-      )
-      }
+        </Box>
+      )}
     </>
   );
 };
 
 export default MatrixClientProvider;
-
