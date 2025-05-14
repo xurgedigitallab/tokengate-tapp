@@ -1,21 +1,48 @@
-# TextRP-Widget-Template
+# TokenGate tApp
 
-A comprehensive Vite+React+TypeScript application template for building custom widgets for TextRP using the Matrix Widget API.
+A comprehensive Vite+React+TypeScript application for controlling access to TextRP rooms based on NFT ownership, using the Matrix Widget API.
 
 ## Overview
 
-This repository serves as a starting point for developers looking to create custom widgets that integrate with TextRP rooms. It provides a pre-configured Vite + React + TypeScript environment with Matrix Widget API integration, allowing developers to quickly build and deploy widgets that can interact with Matrix rooms, access room state events, and communicate with the XRP Ledger.
+This repository provides an NFT Gate widget for TextRP rooms that allows room administrators to restrict access based on NFT ownership criteria. The widget integrates with the XRPL and provides a user-friendly interface for setting up and managing access control conditions based on specific NFTs.
 
 ## Features
 
+- **NFT-Based Access Control**: Control room access based on specific NFT ownership criteria
+- **Automated NFT Image Fetching**: Automatically fetches and displays NFT images based on issuer and taxon
+- **Multiple Condition Types**: Support for basic conditions, quantity-based conditions with logical operators (AND/OR)
+- **User-Friendly Interface**: Easy-to-use admin panel for setting up access requirements
 - **Vite + React + TypeScript**: Modern frontend tooling for fast development and type safety
-- **Matrix Widget API Integration**: Pre-configured with Matrix Widget API for seamless integration with TextRP rooms
-- **XRP Ledger Connectivity**: Built-in utilities for connecting to XRPL and retrieving wallet information
-- **TrustLine Management**: Ready-to-use functions for working with XRP TrustLines
-- **Theme Support**: Built-in light/dark mode toggle with persistent theme state
+- **Matrix Widget API Integration**: Seamless integration with TextRP rooms
+- **XRP Ledger Connectivity**: Built-in utilities for connecting to XRPL and verifying NFT ownership
 - **Responsive UI**: Mobile-friendly design using Material UI components
-- **Animation Support**: Integrated with Framer Motion for fluid transitions
-- **TailwindCSS**: Utility-first CSS framework for rapid UI development
+
+## Development Setup with CORS Proxy
+
+This application includes a built-in CORS proxy configuration in the Vite development server to handle API requests to the NFT service. The proxy is configured in `vite.config.ts` and automatically forwards requests from `/api/*` endpoints to the appropriate backend service.
+
+## Using the NFT Gate Widget
+
+### For Room Administrators
+
+1. **Basic Configuration**: Set up a simple NFT requirement by entering the NFT issuer address and taxon. The widget will automatically fetch and display the NFT image.
+
+2. **Advanced Configuration**: Create complex access rules using the Quantity tab, where you can combine multiple NFT requirements with AND/OR operators.
+
+3. **Save Configuration**: After setting up your desired NFT access rules, click Save to apply them to the room.
+
+### For Developers
+
+The NFT Gate functionality is implemented in the `src/NFTAdmin` directory with the following structure:
+
+- `components/`: UI components for the NFT gate interface
+- `hooks/`: React hooks for handling NFT admin logic
+- `services/`: Services for NFT image fetching and API communication
+- `types.ts`: TypeScript definitions for NFT condition types
+- `utils.ts`: Utility functions
+- `cache.ts`: Caching mechanism for NFT images
+
+The main image fetching service is in `services/nftImageService.ts` which handles fetching NFT images from the API based on issuer and taxon.
 
 ## Getting Started
 
@@ -29,8 +56,8 @@ This repository serves as a starting point for developers looking to create cust
 
 1. Clone this repository
    ```
-   git clone https://github.com/xurgedigitallab/TextRP-Widget-Template.git
-   cd TextRP-Widget-Template
+   git clone https://github.com/xurgedigitallab/tokengate-tapp.git
+   cd tokengate-tapp
    ```
 
 2. Install dependencies
@@ -45,10 +72,10 @@ This repository serves as a starting point for developers looking to create cust
 
 4. Use Ngrok to expose your development server to the internet
    ```
-   ngrok http http://localhost:5173
+   ngrok http http://localhost:3000
    ```
 
-5. Add the ngrok URL to your TextRP room
+5. Add the ngrok URL to your TextRP room as a widget
    ```
    /addwidget <ngrok-url>
    ```
