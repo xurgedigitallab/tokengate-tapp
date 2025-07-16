@@ -1,5 +1,6 @@
 // NFT Image Fetching Service - Direct implementation from import code
 import { getFromCache, updateCache } from '../cache';
+import API_URLS from "../../config.ts";
 
 export interface NFTMetadata {
   issuer: string;
@@ -14,7 +15,7 @@ export interface NFTMetadata {
 }
 
 // Use local proxy to avoid CORS issues, the proxy is configured in vite.config.ts
-const API_URL = '';  // Empty base URL will use the current origin with the proxy path
+const API_URL = API_URLS.backendUrl;//'';  // Empty base URL will use the current origin with the proxy path
 
 // API key - exactly matching import code
 const API_KEY = '1234567890QWERTYUIOP';
@@ -66,7 +67,13 @@ export const fetchNFTImageUrl = async (
     console.log(`DEBUG: Starting fetch for NFT image - Issuer: ${issuer}, Taxon: ${taxon}`);
 
     // We'll try both fetch and XMLHttpRequest to see if either works
-    const url = `${API_URL}/api/nfts/image-only?issuer=${encodeURIComponent(issuer)}&taxon=${encodeURIComponent(taxon)}`;
+    // const url = `${API_URL}/api/nfts/image-only?issuer=${encodeURIComponent(issuer)}&taxon=${encodeURIComponent(taxon)}`;
+    const url = `${API_URL}/api/nfts/image-only`;
+    const requestBody = {
+        issuer: encodeURIComponent(issuer),
+        taxon: encodeURIComponent(taxon),
+      };
+
     console.log(`DEBUG: Request URL: ${url}`);
     console.log(`DEBUG: Using auth: Bearer ${API_KEY}`);
 
@@ -74,13 +81,14 @@ export const fetchNFTImageUrl = async (
     console.log('DEBUG: Trying window.fetch approach');
     const fetchPromise = new Promise<string | null>((resolve, reject) => {
       window.fetch(url, {
-        method: 'GET',
+        method: 'POST',
         headers: { 
           'Authorization': `Bearer ${API_KEY}`,
           'Content-Type': 'application/json',
           'Accept': 'application/json',
         },
         mode: 'cors',
+        body: JSON.stringify(requestBody),
       })
       .then(response => {
         console.log(`DEBUG: Fetch response status: ${response.status}`);
@@ -107,15 +115,15 @@ export const fetchNFTImageUrl = async (
 
       // Set a timeout for the fetch attempt
       setTimeout(() => {
-        reject(new Error('Fetch timeout after 5 seconds'));
-      }, 5000);
+        reject(new Error('Fetch timeout after 10 seconds'));
+      }, 10000);
     });
 
     // Second approach: Try with XMLHttpRequest as fallback
     const xhrPromise = new Promise<string | null>((resolve, reject) => {
       console.log('DEBUG: Trying XMLHttpRequest approach');
       const xhr = new XMLHttpRequest();
-      xhr.open('GET', url, true);
+      xhr.open('POST', url, true);
       xhr.setRequestHeader('Authorization', `Bearer ${API_KEY}`);
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.setRequestHeader('Accept', 'application/json');
@@ -152,16 +160,18 @@ export const fetchNFTImageUrl = async (
         reject(new Error('XHR request timed out'));
       };
       
-      xhr.send();
+      xhr.send( JSON.stringify(requestBody) );
     });
 
     // Try both methods and race them
+    console.log("fetchPromise : ", fetchPromise);
+    console.log("xhrPromise : ", xhrPromise);
     const imageUrl = await Promise.race([
       fetchPromise.catch(err => {
         console.log('DEBUG: Fetch approach failed, falling back to XHR', err);
         // Log CORS issues specifically
         if (err instanceof TypeError && err.message.includes('network')) {
-          console.error('DEBUG: This appears to be a CORS or network error');
+          console.error('DEBUG: This appears to be a CORS or networ11k error');
         }
         return null;
       }),
@@ -170,6 +180,7 @@ export const fetchNFTImageUrl = async (
         return null;
       })
     ]);
+    console.log(`DEBUG: Image URL fetched: ${imageUrl}`);
 
     // If we got a result from either method
     if (imageUrl) {
