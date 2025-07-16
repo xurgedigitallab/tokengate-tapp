@@ -3,7 +3,6 @@ import { MuiThemeProvider, MuiWidgetApiProvider } from '@matrix-widget-toolkit/m
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 import { WidgetParameter } from '@matrix-widget-toolkit/api';
 import { NFTAdmin } from "./NFTAdmin";
-
 interface AppProps {
   widgetApiPromise: Promise<any>;
 }

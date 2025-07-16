@@ -13,8 +13,8 @@ import {
 } from '@mui/material';
 import { ConditionTree, LockCondition, TraitCondition } from '../types';
 import { BasicConditionForm } from './BasicConditionForm.js';
-import { QuantityConditionEditor } from './QuantityConditionEditor.js';
-import { TraitsConditionEditor } from './TraitsConditionEditor.js';
+// import { QuantityConditionEditor } from './QuantityConditionEditor.js';
+// import { TraitsConditionEditor } from './TraitsConditionEditor.js';
 
 interface NFTAdminContentProps {
   conditionTree: ConditionTree;
@@ -45,13 +45,13 @@ export const NFTAdminContent: React.FC<NFTAdminContentProps> = ({
   displayName,
   initialTab,
   editingBasic,
-  editingQuantity,
-  editingTraits,
+  // editingQuantity,
+  // editingTraits,
   onKickMessageChange,
   onTreeChange,
   onSave,
-  onAddCondition,
-  onAddSubgroup,
+  // onAddCondition,
+  // onAddSubgroup,
   describeConditionTree,
   onTabChange,
 }) => {
@@ -61,6 +61,7 @@ export const NFTAdminContent: React.FC<NFTAdminContentProps> = ({
     setCurrentTab(newValue);
     onTabChange(newValue);
   };
+
 
   return (
     <Container maxWidth="md" sx={{ mt: 4, mb: 4 }}>
@@ -122,7 +123,7 @@ export const NFTAdminContent: React.FC<NFTAdminContentProps> = ({
             )}
           </Box>
 
-          <Box role="tabpanel" hidden={currentTab !== 'quantity'} sx={{ py: 3 }}>
+          {/* <Box role="tabpanel" hidden={currentTab !== 'quantity'} sx={{ py: 3 }}>
             {currentTab === 'quantity' && (
               <QuantityConditionEditor
                 conditionTree={editingQuantity || conditionTree}
@@ -132,7 +133,6 @@ export const NFTAdminContent: React.FC<NFTAdminContentProps> = ({
               />
             )}
           </Box>
-
           <Box role="tabpanel" hidden={currentTab !== 'traits'} sx={{ py: 3 }}>
             {currentTab === 'traits' && (
               <TraitsConditionEditor
@@ -140,7 +140,7 @@ export const NFTAdminContent: React.FC<NFTAdminContentProps> = ({
                 onChange={onTreeChange}
               />
             )}
-          </Box>
+          </Box> */}
         </Box>
 
         <Divider sx={{ my: 3 }} />
